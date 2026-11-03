@@ -83,14 +83,6 @@ test {
 jacocoTestReport {
   // Inspired by https://www.baeldung.com/jacoco-report-exclude#2-gradle-configuration
   dependsOn test // tests are required to run before generating the report
-  
-  afterEvaluate {
-    classDirectories.setFrom(files(classDirectories.files.collect {
-      fileTree(dir: it, exclude: [
-        "dev/" + pluginOwner + "/" + pluginName + "/bstats/*"
-      ])
-    }))
-  }
 }
 
 jar {
