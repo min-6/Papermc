@@ -1,110 +1,115 @@
-# min_bgm Region Music
+# min_bgm 영역별 배경 음악 플러그인
 
-## Overview
+## 기능 개요
 
-The plugin assigns a resource-pack sound to an X/Z region. When a player enters
-that region, the plugin requests playback of the assigned sound. When the player
-leaves, changes region, or the region's sound changes, the previous custom sound
-is stopped before the next one is requested.
+이 플러그인은 리소스팩에 등록된 사운드를 X/Z 좌표 영역에 지정합니다. 플레이어가 해당 영역에 들어오면 지정된 사운드의 재생을 요청하고, 영역을 벗어나거나 다른 영역으로 이동하거나 해당 영역의 사운드가 바뀌면 이전 커스텀 사운드를 중지한 뒤 새 사운드의 재생을 요청합니다.
 
-Regions are scoped to the world where they were created. Their bounds include
-both corner coordinates. If regions overlap, the smallest matching region takes
-priority. The Y coordinate is not considered.
+영역은 생성 당시 명령을 실행한 월드에 연결됩니다. 좌표 두 점의 범위는 양 끝을 포함하며, 영역이 겹치면 더 작은 영역이 우선합니다. Y 좌표는 판정에 사용하지 않습니다.
 
-## Requirements
+## 준비 사항
 
-- The resource pack must define the sound in `assets/<namespace>/sounds.json` and
-  provide its audio file.
-- Players must have the resource pack enabled to hear custom sounds.
-- Commands must be run by an in-game player with the
-  `papermcplugintemplate.regionmusic` permission. This permission defaults to OP.
-- Region names must be 1-32 characters containing only ASCII letters, numbers,
-  `_`, or `-`.
+- 리소스팩에 `assets/<namespace>/sounds.json`과 해당 사운드 파일이 있어야 합니다.
+- 플레이어가 리소스팩을 적용해야 커스텀 사운드를 들을 수 있습니다.
+- 명령어는 게임 내 플레이어가 실행해야 하며 `papermcplugintemplate.regionmusic` 권한이 필요합니다. 기본 권한은 OP입니다.
+- 영역 이름은 영문자, 숫자, `_`, `-`만 사용할 수 있고 길이는 1~32자입니다.
 
-The plugin does not distribute or force-accept a resource pack, and it cannot
-guarantee that a client actually played or heard a requested sound. It also does
-not disable Minecraft's built-in background music; that requires a resource pack
-that replaces the relevant vanilla tracks or a client-side mod.
+플러그인은 리소스팩을 배포하거나 플레이어에게 강제로 적용하지 않습니다. 클라이언트가 사운드를 실제로 재생했거나 플레이어가 들었는지도 확인할 수 없습니다. 마인크래프트 기본 배경음악을 끄려면 바닐라 음악을 대체하는 리소스팩이나 클라이언트 모드가 별도로 필요합니다.
 
-## Commands
+## 명령어
 
-All commands use `/regionmusic` and can only be run by an in-game player.
+명령어는 `/regionmusic`으로 시작하며 게임 내 플레이어만 실행할 수 있습니다.
 
-### Add a region
+### 영역 추가
 
 ```text
-/regionmusic add <x1> <z1> <x2> <z2> <name>
+/regionmusic add <x1> <z1> <x2> <z2> <이름>
 ```
 
-Creates a named region in the command sender's current world. The coordinate
-corners can be provided in either order.
+명령을 실행한 플레이어의 현재 월드에 이름이 지정된 영역을 추가합니다. 두 좌표를 어느 순서로 입력해도 됩니다.
 
-Example:
+예시:
 
 ```text
 /regionmusic add 100 200 150 250 forest
 ```
 
-### Assign or change a region's song
+### 영역 노래 지정 또는 변경
 
 ```text
-/regionmusic song <name> <namespace:sound>
+/regionmusic song <이름> <namespace:sound>
 ```
 
-The sound key must match an entry registered by the resource pack's
-`sounds.json`. Assigning a new sound updates players currently inside the region.
+사운드 키는 리소스팩의 `sounds.json`에 등록된 키와 일치해야 합니다. 노래를 변경하면 현재 해당 영역에 있는 플레이어에게도 새 사운드 적용을 요청합니다.
 
-Example:
+예시:
 
 ```text
 /regionmusic song forest min_bgm:forest_theme
 ```
 
-### Move a region
+### 영역 이동
 
 ```text
-/regionmusic move <name> <x1> <z1> <x2> <z2>
+/regionmusic move <이름> <x1> <z1> <x2> <z2>
 ```
 
-Changes the bounds while keeping the region's world and assigned sound.
+영역의 월드와 지정된 사운드는 유지하고 좌표 범위만 변경합니다.
 
-### Delete a region
+### 영역 삭제
 
 ```text
-/regionmusic delete <name>
+/regionmusic delete <이름>
 ```
 
-Deletes the region and its song assignment. Any active custom song from that
-region is stopped for affected online players.
+영역과 노래 지정을 삭제합니다. 해당 영역의 사운드가 온라인 플레이어에게 재생 중이면 중지를 요청합니다.
 
-## Storage
+## 데이터 저장 위치
 
-Region names, world names, coordinates, and sound keys are stored in
-`plugins/PapermcPluginTemplate/regions.yml` under the server directory. The file
-is created or updated when regions are changed.
+영역 이름, 월드, 좌표, 사운드 키는 서버 디렉터리의 `plugins/PapermcPluginTemplate/regions.yml`에 저장됩니다. 영역을 변경하면 파일이 생성되거나 갱신됩니다.
 
-## Logs
+## 로그
 
-Plugin logs use these prefixes in the server console and `logs/latest.log`:
+서버 콘솔과 `logs/latest.log`에서 다음 접두어로 플러그인 로그를 구분할 수 있습니다.
 
-- `[min_bgm INFO]` for startup, region operations, configuration loading, and
-  playback/stop requests.
-- `[min_bgm WARNING]` for invalid commands, rejected settings, or invalid saved
-  region entries.
-- `[min_bgm SEVERE]` for plugin initialization or region file save failures.
+- `[min_bgm INFO]`: 시작, 영역 작업, 설정 로드, 사운드 재생·중지 요청
+- `[min_bgm WARNING]`: 잘못된 명령, 거부된 설정, 저장된 잘못된 영역 항목
+- `[min_bgm SEVERE]`: 초기화 또는 영역 파일 저장 실패
 
-Playback log entries confirm that the server requested a sound for a player;
-they do not confirm resource-pack acceptance or successful client playback.
+재생 로그는 서버가 플레이어에게 사운드 재생을 요청했다는 뜻입니다. 리소스팩 적용 여부나 클라이언트에서 실제로 재생됐는지는 나타내지 않습니다.
 
-## Development server and tests
+## 빌드 JAR 경로
 
-From the repository root, build and run the local Paper server with:
+저장소 루트(`/workspaces/Papermc`)에서 다음 명령을 실행하면 플러그인을 빌드합니다.
+
+```bash
+./gradlew build
+```
+
+현재 프로젝트 이름과 버전을 기준으로 생성된 JAR의 경로는 다음과 같습니다.
+
+```text
+app/build/libs/papermc-plugin-template-0.1.0.jar
+```
+
+`build`는 JAR을 생성하지만 마인크래프트 서버를 실행하거나 서버의 `plugins` 폴더에 복사하지는 않습니다.
+
+## 개발 서버 실행
+
+저장소 루트에서 아래 명령을 실행하면 서버 파일을 준비하고, 플러그인을 빌드해 개발 서버의 플러그인 폴더로 복사한 다음 Paper 서버를 실행합니다.
 
 ```bash
 ./gradlew :app:runDevServer
 ```
 
-Run the project's automated tests with:
+개발 서버에 복사되는 JAR의 전체 경로는 다음과 같습니다.
+
+```text
+app/.server/plugins/papermc-plugin-template-0.1.0.jar
+```
+
+## 테스트
+
+자동화 테스트는 저장소 루트에서 실행합니다.
 
 ```bash
 ./gradlew :app:test
